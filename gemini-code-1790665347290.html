@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>경영학 CBT 모의고사 (랜덤 셔플 & 암기 해설 강화판)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f2f4f7;
+      color: #1f2937;
+      padding: 12px;
+      line-height: 1.5;
+    }
+
+    .cbt-container {
+      max-width: 1050px;
+      margin: 0 auto;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .main-content {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      width: 100%;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 12px;
+    }
+
+    .sidebar-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .omr-list {
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      padding-right: 4px;
+      flex: 1;
+    }
+
+    .omr-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      font-size: 13px;
+      cursor: pointer;
+      background-color: #f9fafb;
+      transition: all 0.15s ease;
+    }
+
+    .omr-item.active {
+      border-color: #2563eb;
+      font-weight: bold;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    .status-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .status-unanswered {
+      background-color: #e5e7eb;
+      color: #6b7280;
+    }
+
+    .status-correct {
+      background-color: #d1fae5;
+      color: #047857;
+    }
+
+    .status-wrong {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #e5e7eb;
+      margin-bottom: 16px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      background-color: #eff6ff;
+      color: #2563eb;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .btn-shuffle {
+      background-color: #4f46e5;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-shuffle:hover {
+      background-color: #4338ca;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: #4b5563;
+    }
+
+    .question-box {
+      margin-bottom: 20px;
+    }
+
+    .question-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111827;
+      white-space: pre-line;
+      word-break: keep-all;
+      line-height: 1.6;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 14px;
+      text-align: left;
+      background-color: #f9fafb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-height: 48px;
+    }
+
+    .option-btn:hover {
+      border-color: #9ca3af;
+      background-color: #f3f4f6;
+    }
+
+    .option-btn.correct {
+      border-color: #059669 !important;
+      background-color: #ecfdf5 !important;
+      color: #047857 !important;
+      font-weight: 700;
+    }
+
+    .option-btn.wrong {
+      border-color: #dc2626 !important;
+      background-color: #fef2f2 !important;
+      color: #b91c1c !important;
+    }
+
+    .explanation-box {
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 5px solid #10b981;
+      padding: 16px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      color: #1e293b;
+      white-space: pre-line;
+      margin-bottom: 20px;
+      display: none;
+      word-break: keep-all;
+      line-height: 1.65;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px 0;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      min-height: 48px;
+    }
+
+    .btn-prev {
+      background-color: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-next {
+      background-color: #2563eb;
+      color: #ffffff;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      .cbt-container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        max-height: 250px;
+        position: static;
+      }
+      .omr-list {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cbt-container">
+    <div class="main-content">
+      <div class="header">
+        <div class="header-left">
+          <span class="badge" id="categoryBadge">카테고리</span>
+          <button class="btn-shuffle" onclick="resetAndShuffle()">🎲 문제 새로 섞기</button>
+        </div>
+        <span class="progress-text"><span id="currentIndex">1</span> / <span id="totalIndex">52</span></span>
+      </div>
+
+      <div class="question-box">
+        <div class="question-title" id="questionTitle">문제를 불러오는 중입니다...</div>
+      </div>
+
+      <div class="options-list" id="optionsList"></div>
+
+      <div class="explanation-box" id="explanationBox"></div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-prev" id="prevBtn" onclick="prevQuestion()" disabled>이전</button>
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">다음</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-title">
+        <span>답안 현황</span>
+        <span style="font-size: 12px; color: #6b7280;" id="scoreSummary">맞힘: 0/52</span>
+      </div>
+      <div class="omr-list" id="omrList"></div>
+      <button class="btn-shuffle" style="margin-top: 12px; width: 100%; padding: 10px;" onclick="resetAndShuffle()">🎲 문제 다시 섞기</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        id: 1,
+        category: "경영 - 마케팅",
+        question: "다음 중 기업이 고객, 정부, 시민단체 등 여러 집단과 언론 보도의 커뮤니케이션 활동으로 호의적인 관계를 유지하는 촉진 수단은?",
+        options: ["PR (Public Relations)", "광고 (Advertising)", "인적 판매 (Personal Selling)", "판매 촉진 (Sales Promotion)", "다이렉트 마케팅 (Direct Marketing)"],
+        answer: 1,
+        explanation: "[정답] ① PR (Public Relations)\n\n💡 [핵심 요약]\nPR = 이해관계자들과의 호의적 관계 구축 (비대가성/높은 신뢰도)\n\n📌 [상세 해설]\n- PR은 기업이 고객, 정부, 언론, 시민단체 등 다양한 이해관계자와 지속적인 신뢰를 구축하기 위한 활동입니다.\n- 언론의 '퍼블리시티(기사화)'를 주로 이용하므로 직접 광고비를 지불하지 않아 소비자 신뢰도가 매우 높습니다.\n\n🔑 [암기 팁]\n• 광고: 돈 내고 사는 홍보 (대가성)\n• PR: 관계 구축 및 기사화 (비대가성)"
+      },
+      {
+        id: 2,
+        category: "경영 - 전략",
+        question: "다음 중 BCG 매트릭스에서 시장성장률은 낮으나 상대적 시장점유율은 높아 지속적으로 이윤을 창출하는 사업 부문은?",
+        options: ["개 (Dog)", "스타 (Star)", "캐시카우 (Cash Cow)", "야생고양이 (Wild Cat)", "물음표 (Question Mark)"],
+        answer: 3,
+        explanation: "[정답] ③ 캐시카우 (Cash Cow)\n\n💡 [핵심 요약]\n캐시카우 = 성장률 Low + 점유율 High (돈 버는 효자)\n\n📌 [상세 해설]\n- 캐시카우(Cash Cow)는 시장 성장 가능성은 낮지만, 점유율이 높아 안정적인 현금을 쏟아내는 사업 부문입니다.\n- 이곳에서 창출된 현금은 Star나 Question Mark 사업으로 재투자됩니다.\n\n🔑 [BCG 매트릭스 4분면 핵심 공식]\n• Star: 성장률 High + 점유율 High (유망주)\n• Cash Cow: 성장률 Low + 점유율 High (현금창출)\n• Question Mark: 성장률 High + 점유율 Low (기회/고민)\n• Dog: 성장률 Low + 점유율 Low (철수 고려)"
+      },
+      {
+        id: 3,
+        category: "경영 - 전략",
+        question: "다음 중 기업이 고객에게 독특한 가치를 제공하여 높은 가격 프리미엄을 얻는 마이클 포터(Michael E. Porter)의 본원적 전략은?",
+        options: ["모방 전략", "수확 전략", "유지 전략", "차별화 전략", "원가우위 전략"],
+        answer: 4,
+        explanation: "[정답] ④ 차별화 전략\n\n💡 [핵심 요약]\n차별화 전략 = 남다른 독특함 ➔ 가격 프리미엄(고가격)\n\n📌 [상세 해설]\n- 디자인, 브랜드, 품질, 서비스 등에서 경쟁사와 확연히 다른 독특한 가치를 제공하여 고객 충성도를 높이고, 비싼 가격을 부과하는 전략입니다.\n\n🔑 [마이클 포터 본원적 전략 3가지]\n1. 원가우위: 싸게 대량 생산 (예: 다이소)\n2. 차별화: 특별한 가치와 고가격 (예: 애플)\n3. 집중화: 특정 니치 시장 공략"
+      },
+      {
+        id: 4,
+        category: "경영 - 국제경영",
+        question: "다음 중 자원 투입의 위험 정도가 가장 낮으며 통제의 필요성도 가장 낮은 해외시장 진출방법은?",
+        options: ["간접 수출", "라이선싱", "합작 투자", "직접 투자", "프랜차이징"],
+        answer: 1,
+        explanation: "[정답] ① 간접 수출\n\n💡 [핵심 요약]\n간접 수출 = 위험 최저, 통제력 최저 (대행사 이용)\n\n📌 [상세 해설]\n- 국내 무역상사나 수출대행업체를 거쳐 해외에 파는 방식입니다.\n- 기업이 해외 현지를 직접 통제하진 못하지만, 투자 리스크와 자원 투입 부담이 가장 적습니다.\n\n🔑 [해외 진출 위험/통제 순서 (낮음 ➔ 높음)]\n간접수출 ➔ 직접수출 ➔ 라이선싱 ➔ 합작투자 ➔ 단독 직접투자(FDI)"
+      },
+      {
+        id: 5,
+        category: "경영 - 전략",
+        question: "산업구조분석모형(5 Forces Model)으로 기업 환경을 분석할 때 공급자의 교섭력이 강한 상황과 가장 거리가 먼 것은?",
+        options: ["공급자의 수가 적은 경우", "구매자의 전환비용이 낮은 경우", "공급자의 전방통합 능력이 높은 경우", "공급하는 제품의 차별화 정도가 높은 경우", "구매자가 공급자의 비용구조에 대한 정보가 적은 경우"],
+        answer: 2,
+        explanation: "[정답] ② 구매자의 전환비용이 낮은 경우\n\n💡 [핵심 요약]\n전환비용이 '낮으면' 다른 곳으로 쉽게 바꾸므로 구매자의 교섭력이 강해집니다!\n\n📌 [상세 해설]\n- 전환비용(Switching Cost): 거래처를 바꿀 때 드는 시간과 비용.\n- 전환비용이 낮으면 구매자가 맘대로 바꿀 수 있어 '구매자' 파워가 세지고 '공급자' 파워는 약해집니다.\n- 공급자의 교섭력이 강해지려면 전환비용이 '높아야' 합니다."
+      },
+      {
+        id: 6,
+        category: "경영 - 회계",
+        question: "다음 중 아래 설명에 해당하는 재무제표는?\n\n'특정 시점의 기업의 자산과 부채, 자본을 나타낸다. 차변에 있는 자산 금액의 합계는 대변에 있는 부채와 자본 금액의 합계와 항상 일치한다.'",
+        options: ["주석", "자본변동표", "현금흐름표", "재무상태표", "손익계산서"],
+        answer: 4,
+        explanation: "[정답] ④ 재무상태표\n\n💡 [핵심 요약]\n재무상태표 = 특정 시점의 자산/부채/자본 (정태적 보고서)\n\n📌 [상세 해설]\n- 특정 시점(예: 12월 31일 기준)의 재무 상태를 보여줍니다.\n- 대차평균의 원리: [자산(차변) = 부채 + 자본(대변)] 공식이 항상 성립합니다.\n\n🔑 [손익계산서 vs 재무상태표]\n• 재무상태표: 특정 '시점' (스냅샷)\n• 손익계산서: 일정 '기간' 동안의 성과 (동영상)"
+      },
+      {
+        id: 7,
+        category: "경영 - 조직행동",
+        question: "브룸(Vroom)의 기대이론 중 '내가 높은 성과를 올리면 그에 상응하는 보상을 받을 것이다'라고 믿는 정도에 해당하는 개념은?",
+        options: ["유의성 (Valence)", "타당성 (Validity)", "공정성 (Fairness)", "효과성 (Effectiveness)", "수단성 (Instrumentality)"],
+        answer: 5,
+        explanation: "[정답] ⑤ 수단성 (Instrumentality)\n\n💡 [핵심 요약]\n수단성 = [성과 ➔ 보상] 연결 고리에 대한 확신!\n\n📌 [상세 해설]\n브룸의 동기부여 3대 요소:\n1. 기대(Expectancy): 노력하면 성과를 낼까? (노력 ➔ 성과)\n2. 수단성(Instrumentality): 성과를 내면 보상을 줄까? (성과 ➔ 보상)\n3. 유의성(Valence): 그 보상이 나한테 가치가 있나? (보상의 가치)"
+      },
+      {
+        id: 8,
+        category: "경영 - 조직이론",
+        question: "다음 중 유기적 조직에 비해 기계적 조직이 가진 특성으로 가장 거리가 먼 것은?",
+        options: ["업무의 공식화", "다단계 보고체계", "수평적 소통체계", "높은 직무 전문화", "프로세스의 표준화"],
+        answer: 3,
+        explanation: "[정답] ③ 수평적 소통체계\n\n💡 [핵심 요약]\n기계적 조직 = 수직적/관료적 / 유기적 조직 = 수평적/유연함\n\n📌 [상세 해설]\n- 기계적 조직: 피라미드식 수직적 보고, 높은 분업화, 엄격한 규칙, 표준화.\n- 유기적 조직: 자율적, 팀 중심, 수평적 소통, 변화에 빠른 대응."
+      },
+      {
+        id: 9,
+        category: "경영 - 회계",
+        question: "재무상태표는 자산, 부채, 자본으로 구성된다. 다음 중 재무상태표의 자산 계정에 해당하는 항목은?",
+        options: ["선급금", "자본금", "매입채무", "미지급금", "이익잉여금"],
+        answer: 1,
+        explanation: "[정답] ① 선급금\n\n💡 [핵심 요약]\n선급금 = 먼저 준 돈 ➔ 나중에 상품/서비스를 받을 '권리'(자산)\n\n📌 [상세 해설]\n• 자산: 선급금 (먼저 지급한 계약금)\n• 부채: 매입채무, 미지급금 (주어야 할 돈)\n• 자본: 자본금, 이익잉여금"
+      },
+      {
+        id: 10,
+        category: "경영 - 전략",
+        question: "다음 중 마이클 포터의 산업구조분석 모형(5 Forces Model)에 대한 설명으로 가장 올바르지 않은 것은?",
+        options: ["산업 내 경쟁의 변화를 동태적으로 분석한다.", "공급자의 교섭력이 강화되면 기업의 수익성은 감소하게 된다.", "경쟁기업 간의 동질성이 높을수록 해당 산업의 평균 수익률은 낮아지게 된다.", "제품차별화 정도가 높을수록 기업은 상대적으로 높은 수익률을 얻을 수 있다.", "특정 산업 분야에 신규로 진출하려는 기업이 해당 산업의 전망을 파악하는 데 활용할 수 있다."],
+        answer: 1,
+        explanation: "[정답] ① 산업 내 경쟁의 변화를 동태적으로 분석한다.\n\n💡 [핵심 요약]\n5 Forces 모형은 특정 시점을 찍어 보는 '정태적(Static)' 한계가 있습니다.\n\n📌 [상세 해설]\n- 5 Forces 모형은 단점/한계점으로 '시간에 따른 변화(동태적 변화)'를 포착하지 못하고 '현재 상태(정태적)'만 분석한다는 점이 시험에 단골 출제됩니다."
+      },
+      {
+        id: 11,
+        category: "경영 - 마케팅",
+        question: "다음 중 소비자에게 제품의 우수성 및 브랜드 가치를 전달하기 위해 고의로 높은 가격을 책정하는 가격전략은?",
+        options: ["단수가격 전략", "명성과격 전략", "관습가격 전략", "유보가격 전략", "준거가격 전략"],
+        answer: 2,
+        explanation: "[정답] ② 명성과격 전략 (Prestige Pricing)\n\n💡 [핵심 요약]\n명성과격 = 비싸야 잘 팔린다! (고가격 = 고품질 심리 활용)\n\n📌 [상세 해설]\n- 명품 브랜드처럼 '비싼 가격' 자체를 고급스러운 브랜드 이미지와 품질의 징표로 활용하는 가격 전략입니다."
+      },
+      {
+        id: 12,
+        category: "경영 - 마케팅",
+        question: "다음 중 시장세분화 기준 변수 중 행동적 세분화(Behavioral Segmentation) 변수에 해당하는 것은?",
+        options: ["소득 수준", "성별", "브랜드 충성도", "인구밀도", "라이프스타일"],
+        answer: 3,
+        explanation: "[정답] ③ 브랜드 충성도\n\n💡 [핵심 요약]\n행동적 변수 = 소비자의 실제 구매/사용 행동 특성!\n\n📌 [상세 해설]\n• 행동적 변수: 브랜드 충성도, 사용량, 추구 편익, 구매 반응\n• 인구통계적 변수: 소득, 성별, 나이, 직업\n• 지리적 변수: 인구밀도, 도시 규모, 기후\n• 심리분석적 변수: 라이프스타일, 성격"
+      },
+      {
+        id: 13,
+        category: "경영 - 재무/회계",
+        question: "다음 중 기업이 투입한 자기자본 대비 얼마만큼의 당기순이익을 올렸는지 나타내는 대표적인 수익성 비율 지표는?",
+        options: ["부채비율", "당좌비율", "총자산회전율", "재고자산회전율", "자기자본이익률 (ROE)"],
+        answer: 5,
+        explanation: "[정답] ⑤ 자기자본이익률 (ROE)\n\n💡 [핵심 요약]\nROE (Return On Equity) = (당기순이익 / 자기자본) × 100\n\n📌 [상세 해설]\n- 주주가 투자한 돈(자기자본)으로 1년에 얼마나 이익을 냈는지 측정하는 가장 핵심적인 주주 수익성 지표입니다."
+      },
+      {
+        id: 14,
+        category: "경영 - 마케팅",
+        question: "표적시장 소비자의 마음속에 자사 제품이 경쟁제품에 비해 차별화되고 유리한 위치를 차지하도록 하는 마케팅 전략은?",
+        options: ["타기팅 (Targeting)", "포지셔닝 (Positioning)", "시장세분화 (Segmentation)", "크로스 셀링 (Cross-selling)", "마케팅믹스 (Marketing Mix)"],
+        answer: 2,
+        explanation: "[정답] ② 포지셔닝 (Positioning)\n\n💡 [핵심 요약]\n포지셔닝 = 소비자 마음속에 자리 잡기 (Position)\n\n📌 [상세 해설]\n🔑 [STP 전략 순서]\n1. Segmentation (시장 세분화): 나누기\n2. Targeting (타기팅): 목표 정하기\n3. Positioning (포지셔닝): 마음속에 각인시키기"
+      },
+      {
+        id: 15,
+        category: "경영 - 회계",
+        question: "유형자산의 감가상각비를 사용 기간에 걸쳐 나누어 비용으로 인식하는 것과 가장 직접적으로 관련된 회계 원칙은?",
+        options: ["완전공시의 원칙", "공정가치 원칙", "보수주의 원칙", "비교가능성 원칙", "수익·비용 대응의 원칙"],
+        answer: 5,
+        explanation: "[정답] ⑤ 수익·비용 대응의 원칙\n\n💡 [핵심 요약]\n수익을 얻은 기간에 맞춰 비용도 같이 나눈다!\n\n📌 [상세 해설]\n- 건물의 감가상각비를 10년에 걸쳐 나누어 털어내는 이유는, 그 건물로 10년 동안 수익을 얻기 때문입니다. (수익 발생 기간 = 비용 인식 기간)"
+      },
+      {
+        id: 16,
+        category: "경영 - 조직이론",
+        question: "직급 체계 단순화 및 수평적 커리어 레벨 제도를 도입한 현대 조직의 주요 특성으로 가장 알맞은 것은?",
+        options: ["직무의 표준화 정도가 매우 높다.", "의사결정 권한이 분권화되어 있다.", "하향적 의사결정 방식만 활용된다.", "조직구성원의 업무 통제 범위가 좁다.", "조직 환경이 매우 안정적일 때 효과적이다."],
+        answer: 2,
+        explanation: "[정답] ② 의사결정 권한이 분권화되어 있다.\n\n💡 [핵심 요약]\n수평적 조직 = 빠른 대응을 위한 '권한 분권화'\n\n📌 [상세 해설]\n- 직급을 없애고 수평화하는 이유는 현장 실무자가 빠른 결정을 내릴 수 있도록 권한을 나누어주기(분권화) 위함입니다."
+      },
+      {
+        id: 17,
+        category: "경영 - 재무관리",
+        question: "다음 투자안 A, B, C의 순현재가치(NPV)가 큰 순서대로 올바르게 나열한 것은? (단, 할인율은 연 10%)\n\n- A: [현재 -1,000원 / 1년 후 +2,000원]\n- B: [현재 +2,000원 / 1년 후 -1,000원]\n- C: [1년 후 +500원 / 2년 후 +500원]",
+        options: ["A > B > C", "A > C > B", "B > A > C", "B > C > A", "C > B > A"],
+        answer: 4,
+        explanation: "[정답] ④ B > C > A\n\n💡 [핵심 요약]\nNPV = 미래 현금흐름의 현재가치 합계 - 현재 지출\n\n📌 [계산 과정 (할인율 1.1 적용)]\n• A = -1,000 + (2,000 / 1.1) = +818원\n• B = +2,000 - (1,000 / 1.1) = +1,091원\n• C = (500 / 1.1) + (500 / 1.21) = 455 + 413 = +868원\n➔ 크기 순서: B(1091) > C(868) > A(818)"
+      },
+      {
+        id: 18,
+        category: "경영 - 기업일반",
+        question: "다음 중 주주 친화 경영(ESG 중 G 지배구조 개선)을 추구하는 사례에 해당하지 않는 것은?",
+        options: ["자사주 취득 및 소각을 통한 주가 부양", "순환출자 고리 강화를 통한 계열사 지배력 확장", "전자투표제 확대 도입을 통한 주주 참여 유도", "분기 배당 및 차등 배당 실시", "주주 추천 사외이사 공모제 시행"],
+        answer: 2,
+        explanation: "[정답] ② 순환출자 고리 강화를 통한 계열사 지배력 확장\n\n💡 [핵심 요약]\n순환출자 = 편법 지배력 확장 ➔ 주주가치 훼손!\n\n📌 [상세 해설]\n- 순환출자는 총수 일가가 적은 지분으로 그룹 전체를 편법 지배하는 방식으로, 지배구조 투명성을 저해하므로 대표적인 주주 반친화적 행위입니다."
+      },
+      {
+        id: 19,
+        category: "경영 - 회계/재무",
+        question: "A사의 손익계산서 재무비율 분석 설명 중 가장 올바르지 않은 것은?\n\n- 20x1년: 매출액 2,000억 / 매출총이익 1,500억\n- 20x2년: 매출액 1,500억 / 매출총이익 900억",
+        options: ["순이익률: 20x1년 20%, 20x2년 20%", "주당순이익: 20x1년 4원, 20x2년 3원", "영업이익률: 20x1년 50%, 20x2년 50%", "이자보상배율: 20x1년 10배, 20x2년 10배", "매출총이익률: 20x1년 25%, 20x2년 40%"],
+        answer: 5,
+        explanation: "[정답] ⑤ 매출총이익률: 20x1년 25%, 20x2년 40%\n\n💡 [핵심 요약]\n매출총이익률 = (매출총이익 / 매출액) × 100\n\n📌 [계산 검증]\n• 20x1년: 1,500억 / 2,000억 = 75%\n• 20x2년: 900억 / 1,500억 = 60%\n(보기 ⑤의 25%, 40% 수치는 완전 오류입니다.)"
+      },
+      {
+        id: 20,
+        category: "경영 - 마케팅",
+        question: "최근 숏폼(Short-form) 콘텐츠 플랫폼 시장 확대와 관련된 소비자 행동 추론으로 가장 거리가 먼 것은?",
+        options: ["짧고 자극적인 콘텐츠 소비의 증가", "긴 서사 구조의 전통적 스토리텔링 수요 폭증", "시공간 제약 감소로 인한 이동 중 소비 증가", "긴 동영상에 대한 집중도 및 몰입 지속 시간 감소", "핵심 메시지만 요약 전달하는 제작 방식 집중"],
+        answer: 2,
+        explanation: "[정답] ② 긴 서사 구조의 전통적 스토리텔링 수요 폭증\n\n💡 [핵심 요약]\n숏폼 트렌드 = 템포가 빠르고 짧은 콘텐츠 선호 ➔ 호흡 긴 스토리텔링 수요 감소!"
+      },
+      {
+        id: 21,
+        category: "경영 - 마케팅",
+        question: "다음 중 숏폼 콘텐츠 트렌드 및 소비 성향에 가장 부합하지 않는 홍보 전략은?",
+        options: ["5분 이내 플레이 가능한 보드게임 규칙 설명 영상", "2시간짜리 영화 핵심 줄거리 1분 요약 숏폼", "출퇴근길 3분 인문학 오디오 요약본", "2분 이내 댄스 챌린지 오디션 영상", "조선왕조실록 전체를 다루는 25부작 연재 다큐 시리즈"],
+        answer: 5,
+        explanation: "[정답] ⑤ 조선왕조실록 전체를 다루는 25부작 연재 다큐 시리즈\n\n💡 [핵심 요약]\n25부작 장편 다큐는 '짧고 즉각적인' 숏폼 소비 트렌드와 반대됩니다."
+      },
+      {
+        id: 22,
+        category: "경영 - 회계",
+        question: "기업의 현금흐름표 작성 시 다음 (가), (나), (다) 거래의 현금흐름 활동 구분을 올바르게 연결한 것은?\n\n(가) 장기차입금 원금 상환\n(나) 공장 부지용 토지 매입 대금 지급\n(다) 본사 직원 월급 및 급여 지급",
+        options: ["영업 - 재무 - 투자", "영업 - 투자 - 재무", "재무 - 영업 - 투자", "재무 - 투자 - 영업", "투자 - 재무 - 영업"],
+        answer: 4,
+        explanation: "[정답] ④ 재무 - 투자 - 영업\n\n💡 [핵심 요약]\n현금흐름 3대 활동 구분 기준 암기!\n\n📌 [상세 해설]\n• (가) 장기차입금 상환: 돈을 빌리고 갚는 활동 ➔ '재무활동'\n• (나) 토지/설비 매입: 자산을 사고파는 활동 ➔ '투자활동'\n• (다) 급여/매출: 주된 영업 행위 ➔ '영업활동'"
+      },
+      {
+        id: 23,
+        category: "경영 - 회계/재무",
+        question: "A사(부채비율이 매우 낮음)와 B사(부채비율이 매우 높음)를 비교한 설명 중 가장 올바르지 않은 것은?",
+        options: ["두 회사의 자기자본이익률(ROE)은 동일하다.", "A사가 B사보다 타인자본을 훨씬 더 공격적으로 활용하고 있다.", "A사는 수익성이, B사는 자산 활용 효율성이 상대적으로 높을 수 있다.", "B사는 판매 마진이 상대적으로 낮을 가능성이 있다.", "B사는 보유 자산을 상대적으로 적게 유지하여 운용한다."],
+        answer: 2,
+        explanation: "[정답] ② A사가 B사보다 타인자본을 훨씬 더 공격적으로 활용하고 있다.\n\n💡 [핵심 요약]\n부채비율이 높은 기업 = B사 ➔ 타인자본(부채)을 더 공격적으로 활용하는 기업은 B사!"
+      },
+      {
+        id: 24,
+        category: "경영 - 전략",
+        question: "네이버(Naver)의 해외 진출 사례에 대한 설명 중 가장 올바르지 않은 것은?",
+        options: ["전략적 제휴를 통한 수직적 통합 추진", "국내에서 확보한 경쟁력을 해외 시장으로 확장", "해외 현지의 문화적 특성을 기회 요인으로 활용", "현지 파트너와의 보완적 자원 네트워크 구축", "창업 초기부터 해외를 겨냥한 '본 글로벌(Born Global)' 기업이다."],
+        answer: 5,
+        explanation: "[정답] ⑤ 창업 초기부터 해외를 겨냥한 '본 글로벌(Born Global)' 기업이다.\n\n💡 [핵심 요약]\n네이버는 국내 시장을 완전히 정복한 후 해외로 나간 단계적 진출 기업입니다.\n\n📌 [상세 해설]\n- 본 글로벌(Born Global): 창업 시점부터 해외 시장을 겨냥한 스타트업.\n- 네이버는 국내 검색시장을 석권한 뒤 라인(LINE) 등으로 해외에 확장했으므로 본 글로벌이 아닙니다."
+      },
+      {
+        id: 25,
+        category: "경영 - 국제경영",
+        question: "[글로벌 통합 - 현지화 대응 모형]에서 초국적 전략(Transnational Strategy)에 대한 설명으로 옳지 않은 것은?",
+        options: ["글로벌 효율성과 현지 적응성을 동시에 추구한다.", "모든 가치창출 활동을 본사의 핵심역량 위치에만 집중화한다.", "주요 제품과 핵심 부품을 지역적 선호에 맞춰 조정한다.", "글로벌 경쟁이 치열한 다국적 기업들이 주로 선택한다.", "핵심역량의 부분적 집중화와 탈집중화를 동시에 도모한다."],
+        answer: 2,
+        explanation: "[정답] ② 모든 가치창출 활동을 본사의 핵심역량 위치에만 집중화한다.\n\n💡 [핵심 요약]\n초국적 전략 = 효율성 + 현지화 '둘 다' 챙기는 분산 네트워크형 전략!\n\n📌 [상세 해설]\n- 모든 가치창출 활동을 본사에 모아두는 것은 '글로벌 전략'입니다. 초국적 전략은 전 세계 지사에 역량을 분산시켜 협력합니다."
+      },
+      {
+        id: 26,
+        category: "경영 - 국제경영",
+        question: "Bartlett & Ghoshal의 [글로벌 통합-현지 대응 모형]에 대한 설명으로 옳지 않은 것은?",
+        options: ["글로벌 통합 전략: 단일 표준화 제품을 대량 생산하여 비용을 절감한다.", "글로벌 통합 전략: 본사 중심의 집권화된 의사결정이 이루어진다.", "국제화 전략: 해외 자회사는 본사 기술을 이전받아 이식하는 역할을 한다.", "현지화 전략: 각 국가별 자회사에 대폭적인 권한을 위임한다.", "현지화 전략: 규모의 경제 효과를 극대화하는 것을 최우선으로 한다."],
+        answer: 5,
+        explanation: "[정답] ⑤ 현지화 전략: 규모의 경제 효과를 극대화하는 것을 최우선으로 한다.\n\n💡 [핵심 요약]\n규모의 경제(비용 절감)를 최우선으로 하는 전략 = '글로벌 통합 전략'\n\n📌 [상세 해설]\n- 현지화 전략은 '각국 고객의 입맛 맞춤'을 최우선으로 하므로 비용 절감 및 규모의 경제와는 거리가 끕니다."
+      },
+      {
+        id: 27,
+        category: "경영 - 재무/회계",
+        question: "기업이 영업활동을 통해 벌어들인 이익(영업이익)으로 금융기관에 지급해야 할 이자비용을 감당할 수 있는 능력을 측정하는 지표는?",
+        options: ["당좌비율", "부채비율", "이자보상배율", "자기자본증가율", "영업이익증가율"],
+        answer: 3,
+        explanation: "[정답] ③ 이자보상배율\n\n💡 [핵심 요약]\n이자보상배율 = 영업이익 / 이자비용\n\n📌 [상세 해설]\n- 이 배율이 1 미만이면 벌어들인 돈으로 이자조차 못 갚는 상태로, '한계기업(좀비기업)'이라고 부릅니다."
+      },
+      {
+        id: 28,
+        category: "경영 - 기업법/일반",
+        question: "주식회사(Corporation) 형태의 기업 특징에 대한 올바른 설명을 모두 고른 것은?\n\n㉠ 회사채(사채) 발행이 불가능하다.\n㉡ 주식 양도를 통한 지분 처분이 자유롭다.\n㉢ 소유와 경영이 완전히 일치하는 것이 일반적이다.\n㉣ 주주는 인수한 주식의 출자금액 한도 내에서 유한책임을 진다.",
+        options: ["㉠, ㉡", "㉡, ㉢", "㉠, ㉢", "㉡, ㉣", "㉢, ㉣"],
+        answer: 4,
+        explanation: "[정답] ④ ㉡, ㉣\n\n💡 [핵심 요약]\n주식회사 = 채권 발행 가능 + 주식 양도 자유 + 소유·경영 분리 + 주주 유한책임!\n\n📌 [오답 정리]\n• ㉠ 사채 발행 가능합니다.\n• ㉢ 소유(주주)와 경영(전문경영인)이 '분리'되는 것이 특징입니다."
+      },
+      {
+        id: 29,
+        category: "경영 - 재무관리",
+        question: "비상장 기업이 최초로 불특정 다수의 외부 투자자들에게 주식을 공모하고 주식시장에 상장시키는 재무 활동은?",
+        options: ["블록딜 (Block Deal)", "공개매수 (Tender Offer)", "기업공개 (IPO)", "유상증자 (Rights Offering)", "자사주 매입 (Buyback)"],
+        answer: 3,
+        explanation: "[정답] ③ 기업공개 (IPO: Initial Public Offering)\n\n💡 [핵심 요약]\nIPO = 비상장 기업이 주식 시장에 처음으로 상장하는 것!"
+      },
+      {
+        id: 30,
+        category: "경영 - 재무관리",
+        question: "주가를 주당순자산(BPS)으로 나눠 산출하는 투자 지표(A)와, 이 (A) 지표가 시장 평균 대비 낮게 형성되어 있는 주식 유형(B)의 올바른 짝은?",
+        options: ["PBR - 가치주", "PBR - 성장주", "PER - 가치주", "PER - 성장주", "EBITDA - 가치주"],
+        answer: 1,
+        explanation: "[정답] ① PBR - 가치주\n\n💡 [핵심 요약]\n• 순자산 대비 주가 = PBR\n• PER/PBR이 낮아 실적/자산 대비 저평가된 주식 = '가치주'\n\n🔑 [가치주 vs 성장주]\n• 가치주: PBR/PER 낮음, 안정적, 저평가\n• 성장주: PBR/PER 높음, 미래 성장 기대감 반영 (예: 테크주)"
+      },
+      {
+        id: 31,
+        category: "경영 - 조직행동",
+        question: "조직에 대한 도덕적 의무감, 책임감, 가치관에 기초하여 조직에 계속 남아있고자 하는 조직몰입(Organizational Commitment)의 유형은?",
+        options: ["지속적 몰입 (Continuance)", "규범적 몰입 (Normative)", "정서적 몰입 (Affective)", "재정적 몰입 (Financial)", "손실적 몰입 (Loss-based)"],
+        answer: 2,
+        explanation: "[정답] ② 규범적 몰입 (Normative Commitment)\n\n💡 [핵심 요약]\n조직 몰입 3가지 유형 암기!\n\n📌 [상세 해설]\n1. 정서적 몰입: 회사에 대한 애정과 좋아서 남음\n2. 지속적 몰입: 나갈 때 손해/비용이 커서 남음\n3. 규범적 몰입: 도덕적 의무감/책임감 때문에 남음"
+      },
+      {
+        id: 32,
+        category: "경영 - 전략",
+        question: "제이 바니(Jay Barney)의 자원기반관점(RBV) VRIO 모형 구성요소 검토 질문에 해당하지 않는 것은?",
+        options: ["해당 자원이 희소한가? (Rarity)", "고객에게 가치가 있는가? (Value)", "타사가 모방하기 어려운가? (Inimitability)", "자원의 가치를 금액 수치로 정확히 측정할 수 있는가?", "자원을 활용할 조직 체계가 정비되어 있는가? (Organization)"],
+        answer: 4,
+        explanation: "[정답] ④ 자원의 가치를 금액 수치로 정확히 측정할 수 있는가?\n\n💡 [핵심 요약]\nVRIO = Value(가치), Rarity(희소성), Inimitability(모방불가능성), Organization(조직)"
+      },
+      {
+        id: 33,
+        category: "경영 - 인사관리",
+        question: "인사평가자가 극단적인 평가(최우수 또는 최하위)를 피하고 피평가자 대부분에게 중간 등급 점수를 부여하는 오류는?",
+        options: ["대비 오류", "상동 오류 (고정관념)", "관대화 경향", "유사성 오류", "중심화 경향"],
+        answer: 5,
+        explanation: "[정답] ⑤ 중심화 경향 (Central Tendency Error)\n\n💡 [핵심 요약]\n중심화 경향 = 욕 안 먹으려고 전부 중간 점수(보통) 주는 오류!"
+      },
+      {
+        id: 34,
+        category: "경영 - 재무/회계",
+        question: "기업이 보유한 자산의 운용 효율성을 측정하는 '활동성 비율(Activity Ratios)' 지표만을 올바르게 고른 것은?\n\n㉠ 유동비율\n㉡ 매출채권회전율\n㉢ 자기자본이익률\n㉣ 재고자산회전율",
+        options: ["㉠, ㉡", "㉠, ㉢", "㉡, ㉢", "㉡, ㉣", "㉢, ㉣"],
+        answer: 4,
+        explanation: "[정답] ④ ㉡, ㉣\n\n💡 [핵심 요약]\n'~회전율' 자가 붙으면 자산을 얼마나 잘 돌렸나 보는 '활동성 비율'!\n\n📌 [상세 해설]\n• 유동비율: 유동성 비율 (빚 갚을 능력)\n• 자기자본이익률: 수익성 비율\n• 매출채권회전율 / 재고자산회전율: 활동성 비율"
+      },
+      {
+        id: 35,
+        category: "경영 - 조직행동",
+        question: "맥그리거(McGregor)의 Y이론 인간관에 해당하는 특성으로 가장 적절한 것은?",
+        options: ["인간은 본능적으로 자율성과 혁신 및 성취를 추구한다.", "종업원은 엄격한 규율과 외부 통제로만 관리해야 한다.", "경제적 보상과 처벌만이 유일한 동기부여 수단이다.", "기본적으로 인간은 게으르고 가능한 책임을 회피하려 한다.", "주로 안전이나 생리적 욕구 등 저차원 욕구에 반응한다."],
+        answer: 1,
+        explanation: "[정답] ① 인간은 본능적으로 자율성과 혁신 및 성취를 추구한다.\n\n💡 [핵심 요약]\n• X이론: 성악설 느낌 (게으르고 통제 필요)\n• Y이론: 성선설 느낌 (자발적, 성취 추구)"
+      },
+      {
+        id: 36,
+        category: "경영 - 재무관리",
+        question: "타인자본(부채)을 지렛대 삼아 자기자본이익률(ROE)을 크게 상승시키는 재무적 효과를 무엇이라 하는가?",
+        options: ["스놉 효과", "빅배스 효과", "레버리지 효과", "포트폴리오 효과", "밴드왜건 효과"],
+        answer: 3,
+        explanation: "[정답] ③ 레버리지 효과 (Leverage Effect)\n\n💡 [핵심 요약]\n레버리지(Leverage) = 지렛대 ➔ 남의 돈(부채)을 빌려 수익률을 극대화하는 효과!"
+      },
+      {
+        id: 37,
+        category: "경영 - 인사관리",
+        question: "허츠버그(Herzberg)의 2요인 이론에서 충족되지 않을 경우 불만족을 일으키지만, 충족되더라도 동기부여 효과는 없는 '위생요인'은?",
+        options: ["승진 기회", "급여 및 임금 수준", "상사로부터의 인정", "작업 자체의 성취감", "직무를 통한 개인적 성장"],
+        answer: 2,
+        explanation: "[정답] ② 급여 및 임금 수준\n\n💡 [핵심 요약]\n• 위생요인(불만족 예방): 급여, 환경, 상사관계 (안 주면 화나지만 줘도 당연하게 앎)\n• 동기요인(만족/성취): 승진, 성취감, 인정, 성장 (하면 일할 맛 남)"
+      },
+      {
+        id: 38,
+        category: "경영 - 전략",
+        question: "적대적 M&A 공격을 방어하기 위해 기업 경영진 해임 시 거액의 퇴직금이나 스톡옵션을 지급하도록 정관에 명시하는 전략은?",
+        options: ["포이즌 필", "그린 메일", "스톡 옵션", "황금 낙하산", "왕관의 보석"],
+        answer: 4,
+        explanation: "[정답] ④ 황금 낙하산 (Golden Parachute)\n\n💡 [핵심 요약]\n황금 낙하산 = M&A 시 임원 해임 비용을 수천억으로 만들어 인수 포기 유도!"
+      },
+      {
+        id: 39,
+        category: "경영 - 재무관리",
+        question: "다음 중 발행되어 거래 중인 기존 회사채의 가격을 하락시키는 요인과 가장 거리가 먼 것은?",
+        options: ["시장 기준금리의 상승", "인플레이션율의 하락", "해당 채권의 시장 유동성 하락", "신규 채권 표면금리의 상승", "발행기업의 신용등급 하락"],
+        answer: 2,
+        explanation: "[정답] ② 인플레이션율의 하락\n\n💡 [핵심 요약]\n금리와 채권 가격은 반대로 움직인다! (금리↓ ➔ 채권가격↑)\n\n📌 [상세 해설]\n- 인플레이션율이 떨어지면 시장 금리가 하락하므로, 채권 가격은 '상승'합니다."
+      },
+      {
+        id: 40,
+        category: "경영 - 재무관리",
+        question: "가중평균자본비용(WACC)의 개념에 대한 설명 중 가장 올바르지 않은 것은?",
+        options: ["부채에 대한 단순 명목 이자비용률만을 의미한다.", "자기자본에 대한 주주들의 기회비용이 반영된다.", "투자자들이 기업에 요구하는 최소 기대수익률이다.", "기업의 신규 프로젝트 투자 판정을 위한 할인율로 사용된다.", "타인자본비용과 자기자본비용을 각각의 시장가치 비중으로 가중평균한다."],
+        answer: 1,
+        explanation: "[정답] ① 부채에 대한 단순 명목 이자비용률만을 의미한다.\n\n💡 [핵심 요약]\nWACC = 타인자본(부채) + 자기자본(주식) 전체 자본의 가중평균 비용!"
+      },
+      {
+        id: 41,
+        category: "경영 - 재무관리",
+        question: "파생상품 중 옵션(Options) 거래에 대한 올바른 설명은?",
+        options: ["콜옵션 매도를 통해 주가 상승 위험을 완전 회피한다.", "풋옵션 매입을 통해 주가 상승 위험을 회피한다.", "콜옵션 매수자는 주가 하락 시 발생 가능한 최대 손실이 프리미엄으로 한정된다.", "풋옵션 매도자의 최대 손실은 프리미엄 범위 내로 제한된다.", "행사가격보다 시장가격이 높으면 풋옵션 매수자는 무조건 이익을 본다."],
+        answer: 3,
+        explanation: "[정답] ③ 콜옵션 매수자는 주가 하락 시 발생 가능한 최대 손실이 프리미엄으로 한정된다.\n\n💡 [핵심 요약]\n옵션 '매수자'는 권리를 포기하면 끝이므로 최대 손실 = 이미 낸 프리미엄!"
+      },
+      {
+        id: 42,
+        category: "경영 - 재무관리",
+        question: "다음과 같은 경제 상황별 확률과 자산 A의 예상 수익률이 주어졌을 때, 자산 A의 기대수익률 E(R)은?\n\n- 호황 (확률 25%): 수익률 +12%\n- 보통 (확률 50%): 수익률 +6%\n- 불황 (확률 25%): 수익률 -8%",
+        options: ["4%", "6%", "8%", "10%", "12%"],
+        answer: 1,
+        explanation: "[정답] ① 4%\n\n💡 [핵심 계산]\n기대수익률 = (확률 × 수익률)의 총합\n\n📌 [풀이]\n- 호황: 0.25 × 12% = +3.0%\n- 보통: 0.50 × 6% = +3.0%\n- 불황: 0.25 × (-8%) = -2.0%\n➔ 합계 = 3.0 + 3.0 - 2.0 = 4.0%"
+      },
+      {
+        id: 43,
+        category: "경영 - 재무관리",
+        question: "다음 조건에서 A사의 가중평균자본비용(WACC)을 구하면 얼마인가?\n\n- 주가: 2,000원, 발행주식수: 100만 주 (자기자본비용: 12%)\n- 차입금(부채): 60억 원 (차입금리: 연 5%)\n- 법인세율: 20%",
+        options: ["연 2%", "연 4%", "연 6%", "연 8%", "연 10%"],
+        answer: 3,
+        explanation: "[정답] ③ 연 6%\n\n💡 [풀이 단계]\n1. 자기자본 가치(E) = 2,000원 × 100만 주 = 20억 원\n2. 부채 가치(D) = 60억 원 (총자본 = 80억 원)\n3. 비율: 자기자본 25% (20/80), 부채 75% (60/80)\n4. 세후 부채비용 = 5% × (1 - 0.2) = 4%\n5. WACC = (25% × 12%) + (75% × 4%) = 3% + 3% = 6%"
+      },
+      {
+        id: 44,
+        category: "경영 - 조직이론",
+        question: "행렬 조직(Matrix Organization)의 주요 특성으로 알맞지 않은 것은?",
+        options: ["명령통일의 원칙이 적용되기 어렵다.", "새로운 프로젝트나 신제품 진입과 철수가 용이하다.", "각 제품별로 완벽히 독립된 전용 사업부 기능을 제공하는 데 유용하다.", "동일 기능 부서의 자원 중복 투입을 방지할 수 있다.", "기능관리자와 프로젝트관리자 간의 갈등 가능성이 존재한다."],
+        answer: 3,
+        explanation: "[정답] ③ 각 제품별로 완벽히 독립된 전용 사업부 기능을 제공하는 데 유용하다.\n\n💡 [핵심 요약]\n매트릭스 조직 = 기존 팀 인력을 공유하는 형태!\n\n📌 [상세 해설]\n- 독립된 전용 기능/부서를 따로따로 갖추는 것은 '사업부제 조직'입니다."
+      },
+      {
+        id: 45,
+        category: "경영 - 조직행동",
+        question: "허시와 블랜차드(Hersey & Blanchard)의 상황적 리더십 이론에서 부하의 성숙도(능력과 의욕)가 모두 가장 낮을 때 적합한 리더십 유형은?",
+        options: ["지시형 (Telling)", "위임형 (Delegating)", "설득/지도형 (Selling)", "참여/지원형 (Participating)", "협업형 (Collaborating)"],
+        answer: 1,
+        explanation: "[정답] ① 지시형 (Telling)\n\n💡 [부하 성숙도별 리더십 매칭]\n• M1 (능력X, 의욕X): 지시형 (Telling)\n• M2 (능력X, 의욕O): 설득/지도형 (Selling)\n• M3 (능력O, 의욕X): 참여/지원형 (Participating)\n• M4 (능력O, 의욕O): 위임형 (Delegating)"
+      },
+      {
+        id: 46,
+        category: "경영 - 회계/재무",
+        question: "주식발행초과금(자본잉여금)을 재원으로 활용하여 무상증자를 단행했을 때 기업의 재무제표에 미치는 영향은?",
+        options: ["기업의 총부채가 증가한다.", "자본금 계정이 감소한다.", "기업의 총자산 금액에는 변화가 없다.", "주당순이익(EPS)이 즉시 증가한다.", "자기자본이익률(ROE)이 크게 감소한다."],
+        answer: 3,
+        explanation: "[정답] ③ 기업의 총자산 금액에는 변화가 없다.\n\n💡 [핵심 요약]\n무상증자 = 자본 안에서 이머니를 저머니로 바꾼 것 ➔ 총자산/총자본 변화 없음!"
+      },
+      {
+        id: 47,
+        category: "경영 - 전략",
+        question: "(A) 모회사가 특정 사업부를 분리하여 지분 100%를 소유하는 신설 법인을 만들고, (B) 이 신설 자회사를 개별적으로 증시에 상장시키는 형태의 올바른 명칭은?",
+        options: ["인적분할 - 우회상장", "물적분할 - 신규상장", "인적분할 - 쪼개기 상장", "물적분할 - 쪼개기 상장", "자산매각 - 쪼개기 상장"],
+        answer: 4,
+        explanation: "[정답] ④ 물적분할 - 쪼개기 상장\n\n💡 [핵심 개념 구분]\n• 물적분할: 모회사가 자회사 지분 100% 소유\n• 인적분할: 기존 주주들이 지분비율대로 자회사 주식을 받아 나눠 가짐"
+      },
+      {
+        id: 48,
+        category: "경영 - 전략",
+        question: "기업의 물적분할 및 자회사 쪼개기 상장에 관한 설명 중 옳지 않은 것은?",
+        options: ["수직적 형태의 기업 분할 방식이다.", "신설 자회사는 최초 비상장법인으로 시작한다.", "자회사의 실적은 모회사의 연결재무제표에 반영된다.", "기존 모회사 주주에게 주식매수청구권이 인정되지 않는 경우가 많았다.", "모회사 주주가 자회사의 배당금을 직접 수령하게 된다."],
+        answer: 5,
+        explanation: "[정답] ⑤ 모회사 주주가 자회사의 배당금을 직접 수령하게 된다.\n\n💡 [핵심 요약]\n물적분할 시 자회사 배당금은 주주가 아닌 '모회사'로 들어갑니다! (그래서 모회사 주주 반발 발생)"
+      },
+      {
+        id: 49,
+        category: "경영 - 생산/경영이론",
+        question: "프레더릭 테일러(Frederick Taylor)의 과학적 관리법(Scientific Management)이 지향하는 궁극적 관리 목표는?",
+        options: ["노동자에게 고임금을 주고 소비자에게 저가격을 제공", "노동자에게 저임금을 주고 소비자에게 고가격을 제공", "노동자에게 고임금을 주고 기업주에게 저노무비를 실현", "노동자에게 저임금을 주고 기업주에게 고노무비를 실현", "노동자에게 저임금을 주고 기업주에게 저노무비를 실현"],
+        answer: 3,
+        explanation: "[정답] ③ 노동자에게 고임금을 주고 기업주에게 저노무비를 실현\n\n💡 [핵심 암기]\n테일러 과학적 관리법의 목표 = 고임금 - 저노무비 (High Wages, Low Labor Cost)"
+      },
+      {
+        id: 50,
+        category: "경영 - 재무관리",
+        question: "EV/EBITDA 멀티플 평가법을 이용한 주당가치 산출:\nEBITDA가 500억 원, 순차입금(부채-현금)이 1,200억 원, 발행주식수가 300만 주, 동종업계 적정 EV/EBITDA 배수가 6배일 때 적정 주당 가치는?",
+        options: ["24,000원", "48,000원", "50,000원", "60,000원", "72,000원"],
+        answer: 4,
+        explanation: "[정답] ④ 60,000원\n\n💡 [풀이 순서]\n1. 기업가치 (EV) = 500억 × 6배 = 3,000억 원\n2. 주주가치(자기자본) = EV(3,000억) - 순차입금(1,200억) = 1,800억 원\n3. 적정 주당 가치 = 1,800억 원 / 300만 주 = 60,000원"
+      },
+      {
+        id: 51,
+        category: "경영 - 조직이론",
+        question: "수평적 커리어 레벨 제도 및 직급 단순화를 적극적으로 도입한 기업 조직의 특징으로 가장 알맞은 것은?",
+        options: ["업무 및 직무의 표준화 수준이 대단히 높다.", "실무 팀 및 개인에게 의사결정 권한이 분권화되어 있다.", "경영진 중심의 엄격한 하향식 의사결정이 강제된다.", "관리자의 업무 통제 범위가 대단히 좁게 형성된다.", "환경 변화가 거의 없는 안정적인 정적 환경에 적합하다."],
+        answer: 2,
+        explanation: "[정답] ② 실무 팀 및 개인에게 의사결정 권한이 분권화되어 있다.\n\n💡 [핵심 요약]\n직급 파괴 & 수평적 조직 = 빠른 의사결정을 위한 권한의 '분권화'"
+      },
+      {
+        id: 52,
+        category: "경영 - 재무관리",
+        question: "다음 투자안 A, B, C의 순현재가치(NPV) 크기를 올바르게 나열한 것은? (할인율 10%)\n\n- A: [현재 -1,000원 / 1년 후 +2,000원]\n- B: [현재 +2,000원 / 1년 후 -1,000원]\n- C: [1년 후 +500원 / 2년 후 +500원]",
+        options: ["A > B > C", "A > C > B", "B > A > C", "B > C > A", "C > B > A"],
+        answer: 4,
+        explanation: "[정답] ④ B > C > A\n\n💡 [계산 검증]\n• A = -1,000 + (2,000 / 1.1) = +818원\n• B = +2,000 - (1,000 / 1.1) = +1,091원\n• C = (500 / 1.1) + (500 / 1.21) = +868원\n➔ B(1091) > C(868) > A(818)"
+      }
+    ];
+
+    let currentIndex = 0;
+    const userAnswers = {};
+
+    // 문제 배열을 랜덤으로 섞는 함수 (Fisher-Yates 알고리즘)
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // 문제를 섞고 상태를 초기화하는 함수
+    function resetAndShuffle() {
+      if (Object.keys(userAnswers).length > 0) {
+        if (!confirm("문제를 새로 섞으시겠습니까? 지금까지 풀었던 모든 답안 기록이 초기화됩니다.")) {
+          return;
+        }
+      }
+      shuffleArray(questions);
+      for (let key in userAnswers) {
+        delete userAnswers[key];
+      }
+      currentIndex = 0;
+      renderQuestion();
+    }
+
+    function renderOmr() {
+      const omrList = document.getElementById("omrList");
+      omrList.innerHTML = "";
+
+      let correctCount = 0;
+
+      questions.forEach((q, idx) => {
+        const item = document.createElement("div");
+        item.className = `omr-item ${idx === currentIndex ? "active" : ""}`;
+        
+        const selected = userAnswers[idx];
+        let statusText = "미기입";
+        let statusClass = "status-unanswered";
+
+        if (selected !== undefined) {
+          if (selected === q.answer) {
+            statusText = "정답";
+            statusClass = "status-correct";
+            correctCount++;
+          } else {
+            statusText = "오답";
+            statusClass = "status-wrong";
+          }
+        }
+
+        item.innerHTML = `
+          <span>${idx + 1}번</span>
+          <span class="status-tag ${statusClass}">${statusText}</span>
+        `;
+
+        item.onclick = () => {
+          currentIndex = idx;
+          renderQuestion();
+        };
+
+        omrList.appendChild(item);
+      });
+
+      document.getElementById("scoreSummary").innerText = `맞힘: ${correctCount}/${questions.length}`;
+    }
+
+    function renderQuestion() {
+      const q = questions[currentIndex];
+      document.getElementById("categoryBadge").innerText = q.category;
+      document.getElementById("currentIndex").innerText = currentIndex + 1;
+      document.getElementById("totalIndex").innerText = questions.length;
+      
+      // 동적 문제 번호 부여
+      document.getElementById("questionTitle").innerText = `${currentIndex + 1}번 문제\n${q.question}`;
+
+      const optionsList = document.getElementById("optionsList");
+      optionsList.innerHTML = "";
+
+      const explanationBox = document.getElementById("explanationBox");
+      explanationBox.style.display = "none";
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.innerText = `${idx + 1}. ${opt}`;
+
+        const selectedOption = userAnswers[currentIndex];
+        if (selectedOption !== undefined) {
+          if (idx + 1 === q.answer) {
+            btn.classList.add("correct");
+          } else if (idx + 1 === selectedOption) {
+            btn.classList.add("wrong");
+          }
+          explanationBox.style.display = "block";
+          explanationBox.innerText = q.explanation;
+        }
+
+        btn.onclick = () => selectOption(idx + 1);
+        optionsList.appendChild(btn);
+      });
+
+      document.getElementById("prevBtn").disabled = currentIndex === 0;
+      document.getElementById("nextBtn").innerText = currentIndex === questions.length - 1 ? "완료" : "다음";
+
+      renderOmr();
+    }
+
+    function selectOption(optionIndex) {
+      if (userAnswers[currentIndex] !== undefined) return;
+      userAnswers[currentIndex] = optionIndex;
+      renderQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        alert("모든 문제를 확인했습니다!");
+      }
+    }
+
+    // 최초 로드 시 자동 문제 섞기 후 첫 화면 렌더링
+    shuffleArray(questions);
+    renderQuestion();
+  </script>
+</body>
+</html>
