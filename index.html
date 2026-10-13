@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>매경TEST 최신 트렌드 반영 실전 80문항 CBT (최종본)</title>
+  <title>매경TEST 최신 트렌드 실전 80문항 CBT (다이어그램 개선 최종본)</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -165,7 +165,6 @@
       line-height: 1.5;
     }
 
-    /* 표 스타일 고도화 */
     .news-box table {
       width: 100%;
       border-collapse: collapse;
@@ -346,7 +345,7 @@
 <body>
 
   <div class="app-header">
-    <h1>📝 매경TEST 최신 트렌드 반영 실전 80문항 CBT (최종본)</h1>
+    <h1>📝 매경TEST 최신 트렌드 실전 80문항 CBT (완벽 검수본)</h1>
     <div class="header-btns">
       <button id="wrongOnlyBtn" class="btn-action btn-danger" onclick="filterWrongQuestions()">틀린 문제만 모아보기</button>
       <button id="showAllBtn" class="btn-action btn-secondary" onclick="showAllQuestions()" style="display:none;">전체 문제 보기</button>
@@ -401,20 +400,33 @@
       {
         id: 2,
         category: "[경영] BCG 매트릭스 전략",
-        news: `[경영전략 실무 리포트] 기업의 포트폴리오 분석 결과, 특정 사업부는 시장 성장률은 낮으나 높은 상대적 점유율을 바탕으로 안정적인 현금 창출원을 제공하고 있다.
-        <table>
-          <thead>
-            <tr><th>구분 / 점유율</th><th>상대적 점유율 (높음)</th><th>상대적 점유율 (낮음)</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>시장성장률 (높음)</td><td>스타 (Star)</td><td>물음표 (Question Mark)</td></tr>
-            <tr><td>시장성장률 (낮음)</td><td><strong>캐시카우 (Cash Cow)</strong></td><td>개 (Dog)</td></tr>
-          </tbody>
-        </table>`,
-        question: "위 BCG 매트릭스 표 분석 관점에서, 시장성장률은 낮으나 상대적 시장점유율은 높아 지속적으로 이윤을 창출하는 안정화된 사업 부문의 명칭은?",
+        news: `<div style="text-align:center; font-weight:bold; margin-bottom:12px; font-size:1.05rem;">〈그림1〉 BCG 매트릭스</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="writing-mode:vertical-rl; font-weight:bold; font-size:0.85rem; color:#475569; text-align:center;">성장률 (High ➔ Low)</div>
+          <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; border:2px solid #cbd5e1; border-radius:8px; overflow:hidden; background:#fff;">
+            <div style="padding:20px; border-right:1px solid #cbd5e1; border-bottom:1px solid #cbd5e1; text-align:center;">
+              <div style="font-size:1.5rem; color:#a855f7;">?</div>
+              <div style="font-weight:600; font-size:0.9rem;">Question Mark</div>
+            </div>
+            <div style="padding:20px; border-bottom:1px solid #cbd5e1; text-align:center;">
+              <div style="font-size:1.5rem; color:#a855f7;">★</div>
+              <div style="font-weight:600; font-size:0.9rem;">Star</div>
+            </div>
+            <div style="padding:20px; border-right:1px solid #cbd5e1; text-align:center;">
+              <div style="font-size:1.5rem; color:#a855f7;">🐕</div>
+              <div style="font-weight:600; font-size:0.9rem;">Dog</div>
+            </div>
+            <div style="padding:20px; text-align:center; background-color:#faf5ff;">
+              <div style="font-size:1.2rem; color:#7e22ce; font-weight:bold;">[ (가) 영역 ]</div>
+              <div style="font-size:0.8rem; color:#6b21a8; margin-top:4px;">(상대적 점유율 High / 성장률 Low)</div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center; font-weight:bold; font-size:0.85rem; color:#475569; margin-top:8px;">경쟁력 (상대 시장점유율 Low ➔ High)</div>`,
+        question: "위 <그림1>의 BCG 매트릭스에서 시장성장률은 낮으나 상대적 시장점유율은 높아 지속적으로 이윤 및 현금을 창출하는 [ (가) 영역 ] 사업 부문의 명칭은?",
         options: ["① 개(Dog)", "② 스타(Star)", "③ 캐시카우(Cash Cow)", "④ 야생고양이(Wild Cat)", "⑤ 물음표(Question Mark)"],
         answer: 3,
-        explanation: "[정답] ③\n\nBCG 매트릭스는 시장성장률과 상대적 시장점유율을 기준으로 사업을 분류한다. 캐시카우(Cash Cow)는 시장성장률은 낮으나 상대적 시장점유율이 높아 지속적인 현금흐름을 창출한다[cite: 1, 2]."
+        explanation: "[정답] ③\n\nBCG 매트릭스에서 시장성장률은 낮으나 상대적 시장점유율이 높은 (가) 영역은 캐시카우(Cash Cow)에 해당합니다. 지속적이고 안정적인 현금흐름을 창출하는 사업 부문입니다[cite: 1, 2]."
       },
       {
         id: 3,
@@ -668,7 +680,7 @@
             <tr><th>통합 압력 \ 현지화 압력</th><th>현지화 압력 (낮음)</th><th>현지화 압력 (높음)</th></tr>
           </thead>
           <tbody>
-            <tr><td>글로벌 통합 압력 (높음)</td><td>A: 글로벌 통합 전략</td><td><strong>B: 초국적 전략</strong></td></tr>
+            <tr><td>글로벌 통합 압력 (높음)</td><td>A: 글로벌 통합 전략</td><td><strong>[ B 영역 ]</strong></td></tr>
             <tr><td>글로벌 통합 압력 (낮음)</td><td>C: 국제화 전략</td><td>D: 현지화 전략</td></tr>
           </tbody>
         </table>`,
@@ -1260,7 +1272,7 @@
       const newsBox = document.getElementById('newsBox');
       if (q.news) {
         newsBox.style.display = 'block';
-        newsBox.innerHTML = q.news; // HTML 태그(표 등) 렌더링 지원
+        newsBox.innerHTML = q.news;
       } else {
         newsBox.style.display = 'none';
         newsBox.innerHTML = '';
